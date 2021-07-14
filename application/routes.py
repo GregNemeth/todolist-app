@@ -21,7 +21,7 @@ def home():
     all_tasks = Todolist.query.all()
     list_of_things_to_do = ""
     for tasks in all_tasks:
-        list_of_things_to_do += '<br>'+ tasks.name + ' | '+ str(tasks.description)+ ' | '+str(tasks.done)
+        list_of_things_to_do += f'{tasks.id} | {tasks.name} | {tasks.description} | {tasks.done}<br>'
     return str(list_of_things_to_do)
 
 @app.route('/update/<int:id>/<new_description>')
