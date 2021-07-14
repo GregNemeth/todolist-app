@@ -1,4 +1,4 @@
-
+from flask import redirect, url_for
 from application import app, db
 from application.models import Todolist
 
@@ -21,44 +21,36 @@ def home():
     all_tasks = Todolist.query.all()
     list_of_things_to_do = ""
     for tasks in all_tasks:
-        list_of_things_to_do += '<br>'+ tasks.name + ' | '+tasks.completed
+        list_of_things_to_do += '<br>'+ tasks.name + ' | '+ str(tasks.description)+ ' | '+str(tasks.done)
     return str(list_of_things_to_do)
 
-@app.route('/update/<task_name>/<new_description>')
-def update(task_name, new_description):
-    current_entry = Todolist(name=task_name)
+@app.route('/update/<int:id>/<new_description>')
+def update(id, new_description):
+    current_entry = Todolist.query.get(id)
     current_entry.description = new_description
+    db.session.add(current_entry)
     db.session.commit()
-    return 'you have updated the description for this task!\n' + f'description: {new_description}'
+    return f'you have updated the description for this task!<br>description: {new_description}'
 
-@app.route('/delete_task/<task_name>')
-def delete_task(task_name):
-    selected_task = task_name
+@app.route('/delete_task/<int:id>')
+def delete_task(id):
+    selected_task = Todolist.query.get(id)
     db.session.delete(selected_task)
     db.session.commit()
-    return f'you have deleted task {selected_task}'
+    return f'you have deleted task {selected_task.name}'
 
-@app.route('/<task_name>/setto/<word>')
-def setto(task_name, word):
-    selected_task = Todolist(name=task_name)
-    if word == 'completed':
-        selected_task.done = True
-        return f'You have marked {task_name} as completed'
+@app.route('/completed/<int:id>')
+def completed(id):
+    selected_task = Todolist.query.get(id)
+    selected_task.done = True
+    db.session.add(selected_task)
+    db.session.commit()
+    return f'you have marked {selected_task.name} as completed'
 
-    if word == 'incomplete':
-        selected_task.done == False
-        return f'You have marked {task_name} as incomplete. Get back to work!!!'
-
-@app.route('/whatsdone/<word>')
-def whatsdone(word):
-    answer = ''
-    if word == 'complete':
-        completed = Todolist.query.filter_by(done=True).all()
-        for task in completed:
-            answer += '<br>' + task.name
-        return answer
-    if word == 'incomplete':
-        incomplete = Todolist.query.fiter_by(done=False).all()
-        for task in incomplete:
-            answer += '<br>' + task.name
-        return answer
+@app.route('/incomplete/<int:id>')
+def incomplete(id):
+    selected_task = Todolist.query.get(id)
+    selected_task.done = False
+    db.session.add(selected_task)
+    db.session.commit()
+    return f'you have marked {selected_task.name} as incomplete'
