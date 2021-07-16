@@ -1,56 +1,79 @@
-from flask import redirect, url_for
+from flask.templating import render_template
+from application.forms import TaskForm
+from flask import redirect, url_for, request
 from application import app, db
-from application.models import Todolist
+from application.models import Tasks
 
-# As a user, I want to add a new todo task, so I know I have a task to be completed (no description)
-# As a user, I want to view my todo tasks, so that I know what I need to do
-# As a user, I want to change the description of the task, so I can update its contents after creating it
-# As a user, I want to delete a task, in case I don't need to do that task anymore	
-# As a user, I want to set a todo task as completed, so I know which tasks I've already done
-# As a user, I want to set a todo task as incomplete, in case a complete task still needs doing
+    # As a user, I want to view all my todo tasks on the home page of the application, so that I can know what tasks still need completing as soon as I navigate to the website
+	# As a user, I want to view all my completed todo tasks from the web page, so I can see how much I've achieved
+	# As a user, I want to add a new todo task with a description using a web form, so I can keep track of things I need to do via a GUI
+	# As a user, I want to change the description of the task using a web form, so I can update its contents after creating it via a GUI
+	# As a user, I want to delete a task with a click of a button, so that I can quickly and easily delete a task
 
-@app.route('/addtask/<task>')
-def addtask(task):
-    new_task = Todolist(name=task)
-    db.session.add(new_task)
-    db.session.commit()
-    return f'You have added {task} to your list'
 
-@app.route('/home')
+@app.route('/')
 def home():
-    all_tasks = Todolist.query.all()
-    list_of_things_to_do = ""
-    for tasks in all_tasks:
-        list_of_things_to_do += f'{tasks.id} | {tasks.name} | {tasks.description} | {tasks.done}<br>'
-    return str(list_of_things_to_do)
+    alltasks = Tasks.query.all()
+    
+        
 
-@app.route('/update/<int:id>/<new_description>')
-def update(id, new_description):
-    current_entry = Todolist.query.get(id)
-    current_entry.description = new_description
-    db.session.add(current_entry)
-    db.session.commit()
-    return f'you have updated the description for this task!<br>description: {new_description}'
+    return render_template("home.html", alltasks=alltasks)
+
+@app.route('/create', methods=["GET", "POST"])
+def create():
+    form = TaskForm()
+
+    if request.method == 'POST':
+        new_task = Tasks(name=form.name.data)
+        db.session.add(new_task)
+        db.session.commit()
+        return redirect(url_for('home'))
+    else:
+        return render_template('create.html', form=form)
+        
+@app.route('/update/<int:id>', methods=['GET','POST'])
+def update(id):
+    current_entry = Tasks.query.get(id)
+    form = TaskForm()
+    
+    if request.method == 'POST':
+        current_entry.name = form.name.data
+        db.session.add(current_entry)
+        db.session.commit()
+
+        return redirect(url_for('home'))
+
+    else:
+        return render_template('create.html', form=form)
 
 @app.route('/delete_task/<int:id>')
 def delete_task(id):
-    selected_task = Todolist.query.get(id)
+    selected_task = Tasks.query.get(id)
     db.session.delete(selected_task)
     db.session.commit()
-    return f'you have deleted task {selected_task.name}'
+    return redirect(url_for('home'))
 
 @app.route('/completed/<int:id>')
 def completed(id):
-    selected_task = Todolist.query.get(id)
+    selected_task = Tasks.query.get(id)
     selected_task.done = True
     db.session.add(selected_task)
     db.session.commit()
-    return f'you have marked {selected_task.name} as completed'
+    return redirect(url_for('home'))
 
 @app.route('/incomplete/<int:id>')
 def incomplete(id):
-    selected_task = Todolist.query.get(id)
+    selected_task = Tasks.query.get(id)
     selected_task.done = False
     db.session.add(selected_task)
     db.session.commit()
-    return f'you have marked {selected_task.name} as incomplete'
+    return redirect(url_for('home'))
+
+@app.route('/donedem')
+def donedem():
+    all_tasks_done = Tasks.query.filter_by(done=True).all()
+    list_of_things_to_do = ""
+    for tasks in all_tasks_done:
+        list_of_things_to_do += f'{tasks.id} | {tasks.name}| {tasks.done}<br>'
+    return str(list_of_things_to_do)
+    
