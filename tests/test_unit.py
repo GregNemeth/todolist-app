@@ -94,11 +94,11 @@ class TestDelete(TestBase):
 
         assert 'Do something else' not in response.data.decode()
 
-# class TestCompleted(TestBase):
-#     def test_completed(self):
-#         response = self.clien.get(
-#             url_for('completed'),
-#             follow_redirects=True
-#         )
+class TestCompleted(TestBase):
+    def test_completed(self):
+        response = self.client.get(
+            url_for('completed', id=1),
+            follow_redirects=True
+        )
 
-#         assert 
+        assert '1 - Run unit tests - True' in response.data.decode()

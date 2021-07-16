@@ -72,8 +72,5 @@ def incomplete(id):
 @app.route('/donedem')
 def donedem():
     all_tasks_done = Tasks.query.filter_by(done=True).all()
-    list_of_things_to_do = ""
-    for tasks in all_tasks_done:
-        list_of_things_to_do += f'{tasks.id} | {tasks.name}| {tasks.done}<br>'
-    return str(list_of_things_to_do)
     
+    return render_template("alldone.html", alltasks=all_tasks_done)
