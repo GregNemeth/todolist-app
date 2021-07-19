@@ -61,3 +61,15 @@ class TestCreate(TestBase):
         # check history
         element = self.driver.find_element_by_xpath('/html/body/div[4]')
         assert 'Check create form' in element.text
+
+class TestUpdate(TestBase):
+    def test_update(self):
+        # navigate to create page
+        self.driver.find_element_by_xpath('/html/body/div[2]/a[1]').click()
+        # find and populate text box
+        self.driver.find_element_by_xpath('//*[@id="name"]').send_keys('banana')
+        # find and click submit button
+        self.driver.find_element_by_xpath('//*[@id="submit"]').click()
+        # check history
+        element = self.driver.find_element_by_xpath('/html/body/div[1]')
+        assert 'banana' in element.text
