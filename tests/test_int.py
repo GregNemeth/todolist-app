@@ -71,5 +71,5 @@ class TestUpdate(TestBase):
         # find and click submit button
         self.driver.find_element_by_xpath('//*[@id="submit"]').click()
         # check history
-        element = self.driver.find_element_by_xpath('/html/body/div[1]')
+        element = self.driver.find_element_by_xpath('/html/body/div[2]')
         assert 'banana' in element.text
